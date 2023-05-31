@@ -33,13 +33,65 @@
       </thead>
       <tbody>
       <tr th:each="weather : ${weatherList}">
+        <td><input type="radio" name ="index"></td>
         <td th:text="${weather.day}"></td>
         <td th:text="${weather.date}"></td>
         <td th:text="${weather.weather}"></td>
         <td th:text="${weather.temperature}"></td>
+        <!--<td th:text="${weatherStat.index}"></td>-->
       </tr>
       </tbody>
     </table>
+    <button onclick="requestMessage()">복장 추천</button>
+  </div>
+  <div>
+    <h3>AI가 추천해준 복장</h3>
+    <div id="answer">
+
+    </div>
   </div>
 </body>
+<script>
+  let indexValue ;
+  function getSelectedValue() {
+    var radios = document.getElementsByName("index");
+
+    for (var i = 0; i < radios.length; i++) {
+      if (radios[i].checked) {
+        console.log("Selected Value: " + i);
+        indexValue = i;
+        break;
+      }
+    }
+  }
+  function requestMessage() {
+    getSelectedValue();
+    let answerDiv = document.getElementById("answer");
+    let value = document.querySelectorAll("table.table-striped tbody tr").item(indexValue).textContent;
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      "requestMessage": "이 날씨에 맞는 데이트 복장 추천해줘. " +value
+    });
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow'
+    };
+
+    fetch("http://localhost:9091/api/ai", requestOptions)
+            .then(response => response.text())
+            .then(result => {
+              console.log(result)
+
+              answerDiv.innerHTML = result;
+            })
+            .catch(error => console.log('error', error));
+  }
+
+</script>
 </html>
